@@ -18,6 +18,7 @@ from typing import Any
 import pandas as pd
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 
 
 APP_DIR = Path(__file__).resolve().parent
@@ -219,11 +220,43 @@ def inject_css() -> None:
         .result-band strong { color:#f0c85c; font-size:1.55rem; }
         .legal { border-top:1px solid var(--line); margin-top:2.5rem; padding:1rem 0 2rem; color:var(--muted); font-size:.72rem; line-height:1.8; }
         div[data-testid="stMetric"] { background:transparent; border-top:1px solid var(--ink); padding:.8rem 0; }
-        div[data-testid="stForm"] { border:1px solid var(--line); border-radius:0; background:rgba(255,255,255,.55); }
-        .stButton button, .stDownloadButton button, [data-testid="stFormSubmitButton"] button { border-radius:0 !important; min-height:44px; font-weight:700; }
-        .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] { border-radius:0 !important; }
+        div[data-testid="stForm"] { border:1px solid var(--line); border-radius:0; background:#fff; }
+        div[data-testid="stForm"] label,
+        div[data-testid="stForm"] p,
+        div[data-testid="stForm"] span,
+        div[data-testid="stForm"] input,
+        div[data-testid="stForm"] [data-baseweb="select"] * { color:var(--ink) !important; }
+        .stButton button, .stDownloadButton button, [data-testid="stFormSubmitButton"] button {
+            border-radius:0 !important; min-height:44px; font-weight:700;
+            background:var(--ink) !important; color:#fff !important; border:1px solid var(--ink) !important;
+        }
+        .stButton button *, .stDownloadButton button *, [data-testid="stFormSubmitButton"] button * {
+            color:inherit !important;
+        }
+        div[data-testid="stForm"] [data-testid="stFormSubmitButton"] button,
+        div[data-testid="stForm"] [data-testid="stFormSubmitButton"] button * {
+            color:#fff !important;
+        }
+        .stButton button[kind="primary"] {
+            background:var(--gold) !important; color:var(--ink) !important; border-color:var(--ink) !important;
+        }
+        .stButton button:hover, [data-testid="stFormSubmitButton"] button:hover {
+            background:var(--ink) !important; color:#fff !important;
+        }
+        .stButton button:focus-visible, [data-testid="stFormSubmitButton"] button:focus-visible {
+            outline:3px solid var(--gold) !important; outline-offset:2px;
+        }
+        .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] {
+            border-radius:0 !important; background:#fff !important; color:var(--ink) !important;
+        }
+        [data-testid="stAlert"] { color:var(--ink) !important; }
+        [data-testid="stAlert"] * { color:inherit !important; }
         [data-testid="stTabs"] [data-baseweb="tab-list"] { gap:0; border-bottom:1px solid var(--ink); }
-        [data-testid="stTabs"] button { border-radius:0; padding:.8rem 1.1rem; }
+        [data-testid="stTabs"] button { border-radius:0; padding:.8rem 1.1rem; color:var(--muted) !important; }
+        [data-testid="stTabs"] button[aria-selected="true"] { color:var(--ink) !important; font-weight:700; }
+        [data-testid="stTabs"] [data-baseweb="tab-highlight"] { background:var(--gold) !important; }
+        .chart-note { display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; color:var(--muted); font-size:.75rem; margin:.45rem 0 1rem; }
+        .storage-note { padding:.9rem 1rem; background:#fff; border:1px solid var(--gold); color:var(--ink); margin:1rem 0; font-size:.82rem; }
         @media (max-width: 700px) {
           [data-testid="stMainBlockContainer"] { padding-left:1rem; padding-right:1rem; }
           .masthead { align-items:start; flex-direction:column; }
@@ -274,6 +307,54 @@ def overview(prices: dict[str, Any] | None) -> None:
     )
 
 
+def tradingview_chart() -> None:
+    st.markdown(
+        '<div class="section-title">الرسم العالمي للذهب</div>'
+        '<div class="section-note">ذهب فوري مقابل الدولار الأمريكي (XAU/USD) من TradingView. '
+        'هذا الرسم بوحدة الدولار/الأونصة ويختلف عن بطاقات الدرهم/الجرام أعلاه.</div>',
+        unsafe_allow_html=True,
+    )
+    components.html(
+        """
+        <div class="tradingview-widget-container" style="height:520px;width:100%">
+          <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+          <div class="tradingview-widget-copyright">
+            <a href="https://www.tradingview.com/symbols/XAUUSD/" rel="noopener nofollow" target="_blank">
+              <span class="blue-text">Gold Spot / U.S. Dollar chart</span>
+            </a> by TradingView
+          </div>
+          <script type="text/javascript"
+            src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+          {
+            "autosize": true,
+            "symbol": "OANDA:XAUUSD",
+            "interval": "D",
+            "timezone": "Asia/Dubai",
+            "theme": "light",
+            "backgroundColor": "#f4f3ed",
+            "gridColor": "rgba(23,23,19,0.08)",
+            "style": "1",
+            "locale": "en",
+            "allow_symbol_change": false,
+            "hide_side_toolbar": true,
+            "withdateranges": true,
+            "save_image": false,
+            "calendar": false,
+            "support_host": "https://www.tradingview.com"
+          }
+          </script>
+        </div>
+        """,
+        height=540,
+        scrolling=False,
+    )
+    st.markdown(
+        '<div class="chart-note"><span>المصدر: TradingView · الرمز: OANDA:XAUUSD</span>'
+        '<span>الرسم مرجعي مستقل عن سعر Metals.Dev المعروض أعلى الصفحة.</span></div>',
+        unsafe_allow_html=True,
+    )
+
+
 def calculator(prices: dict[str, Any] | None) -> None:
     st.markdown('<div class="section-title">حاسبة الشراء</div><div class="section-note">تفصل قيمة الخام عن المصنعية والضريبة حتى تبقى النتيجة قابلة للمراجعة.</div>', unsafe_allow_html=True)
     if not prices:
@@ -299,7 +380,12 @@ def calculator(prices: dict[str, Any] | None) -> None:
 
 
 def purchases(prices: dict[str, Any] | None) -> None:
-    st.markdown('<div class="section-title">سجل المشتريات</div><div class="section-note">محفوظ محليًا في هذا الجهاز. الربح والخسارة مقارنة بقيمة الخام الحالية فقط.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">سجل المشتريات</div><div class="section-note">الربح والخسارة مقارنة بقيمة الخام الحالية فقط.</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="storage-note"><strong>تنبيه التخزين السحابي:</strong> على Streamlit Community Cloud '
+        'هذه البيانات مؤقتة وقد تختفي عند إعادة تشغيل الخادم. يلزم ربط قاعدة بيانات سحابية وحساب مستخدم للحفظ الدائم.</div>',
+        unsafe_allow_html=True,
+    )
     with st.form("purchase"):
         c1, c2, c3 = st.columns(3)
         metal_label = c1.selectbox("المعدن", ["ذهب", "فضة"], key="p_metal")
@@ -405,9 +491,11 @@ def app() -> None:
     prices, status, error = get_prices(refresh=refresh)
     status_strip(prices, status, error)
     overview(prices)
-    tab_calc, tab_purchases, tab_alerts, tab_about = st.tabs(
-        ["الحاسبة", "مشترياتي", "التنبيهات", "المصدر والخصوصية"]
+    tab_chart, tab_calc, tab_purchases, tab_alerts, tab_about = st.tabs(
+        ["الرسم البياني", "الحاسبة", "مشترياتي", "التنبيهات", "المصدر والخصوصية"]
     )
+    with tab_chart:
+        tradingview_chart()
     with tab_calc:
         calculator(prices)
     with tab_purchases:
@@ -420,7 +508,14 @@ def app() -> None:
             "يطلب التطبيق سعر جرام الذهب والفضة بالدرهم مباشرة من Metals.Dev. "
             "أسعار العيارات = سعر ذهب 24 × (العيار ÷ 24). لا نضيف هامش متجر أو مصنعية إلا داخل الحاسبة."
         )
-        st.markdown("**الخصوصية:** المشتريات والتنبيهات وآخر قراءة ناجحة محفوظة في مجلد `.gold_observatory` داخل مجلد التطبيق، ولا تُرسل إلى خادم التطبيق.")
+        st.markdown(
+            "**دقة السعر:** القراءة هي سعر سوق فوري استرشادي من Metals.Dev، وليست سعر البيع النهائي في متجر ذهب. "
+            "قد يتأخر المزود حتى نحو 60 ثانية، بينما يضيف المتجر المصنعية والهامش والضريبة."
+        )
+        st.markdown(
+            "**التخزين:** عند التشغيل محليًا تُحفظ المشتريات والتنبيهات في `.gold_observatory`. "
+            "على Streamlit Community Cloud أو Vercel لا يُعد هذا تخزينًا دائمًا؛ تحتاج قاعدة بيانات خارجية وحساب مستخدم."
+        )
         st.markdown("**إعداد المصدر:** انسخ `.streamlit/secrets.toml.example` إلى `.streamlit/secrets.toml` وأضف مفتاحك.")
         if CACHE_PATH.exists():
             st.caption(f"ملف آخر قراءة: {CACHE_PATH}")
