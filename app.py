@@ -291,20 +291,30 @@ def overview(prices: dict[str, Any] | None) -> None:
         return
     gold = float(prices["gold"])
     silver = float(prices["silver"])
-    st.markdown(
-        f"""
-        <div class="quote-grid">
-          <div class="quote gold"><div class="quote-name">ذهب خام · 24 قيراط</div>
-            <div class="quote-value">{gold:,.2f}</div><div class="quote-unit">درهم إماراتي / جرام</div></div>
-          <div class="quote"><div class="quote-name">فضة خام · نقاء 999</div>
-            <div class="quote-value">{silver:,.2f}</div><div class="quote-unit">درهم إماراتي / جرام</div></div>
-        </div>
-        <div class="assay-table">
-          {''.join(f'<div class="assay-cell"><div class="assay-k">ذهب عيار {k}</div><div class="assay-v">{gold*p:,.2f} د.إ</div></div>' for k,p in KARATS.items())}
-        </div>
-        """,
-        unsafe_allow_html=True,
+    quote_html = (
+        '<div class="quote-grid">'
+        '<div class="quote gold">'
+        '<div class="quote-name">ذهب خام · 24 قيراط</div>'
+        f'<div class="quote-value">{gold:,.2f}</div>'
+        '<div class="quote-unit">درهم إماراتي / جرام</div>'
+        '</div>'
+        '<div class="quote">'
+        '<div class="quote-name">فضة خام · نقاء 999</div>'
+        f'<div class="quote-value">{silver:,.2f}</div>'
+        '<div class="quote-unit">درهم إماراتي / جرام</div>'
+        '</div>'
+        '</div>'
+        '<div class="assay-table">'
+        + "".join(
+            '<div class="assay-cell">'
+            f'<div class="assay-k">ذهب عيار {karat}</div>'
+            f'<div class="assay-v">{gold * purity:,.2f} د.إ</div>'
+            '</div>'
+            for karat, purity in KARATS.items()
+        )
+        + '</div>'
     )
+    st.markdown(quote_html, unsafe_allow_html=True)
 
 
 def tradingview_chart() -> None:
